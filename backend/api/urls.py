@@ -5,7 +5,7 @@ from rest_framework.routers import SimpleRouter
 
 
 router = SimpleRouter()
-router.register('recipe', RecipeVeiwSet)
+router.register('recipes', RecipeVeiwSet)
 urlpatterns = [
     path('', include(router.urls)),
 ]
