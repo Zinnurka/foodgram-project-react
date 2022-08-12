@@ -1,12 +1,13 @@
+from datetime import datetime
+
 from django.db import models
 
-from backend import settings
-from .validators import validate_cooking_time
+from .validators import validate_cooking_time, validate_image
 
 
 class Tags(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
-    color = models.CharField(max_length=200, verbose_name='Цветовой HEX-код ')
+    color = models.CharField(max_length=200, verbose_name='Цветовой HEX-код')
     slug = models.SlugField(verbose_name='Slug', unique=True)
 
     def __str__(self):
@@ -33,7 +34,8 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tags, through='RecipeTags')
     ingredients = models.ManyToManyField('Ingredient',
                                          through='RecipeIngredient')
-    image = models.ImageField(upload_to='recipe/', blank=True)
+    image = models.ImageField(upload_to=f'recipe/{datetime.now().date()}/',
+                              blank=True)
 
 
 class RecipeTags(models.Model):
