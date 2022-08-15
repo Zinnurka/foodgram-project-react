@@ -5,7 +5,6 @@ from recipe.models import Recipe, Tags, Ingredient
 from .fields import Base64ImageField
 
 
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tags
@@ -29,4 +28,3 @@ class RecipeSerializer(serializers.ModelSerializer):
         ordering = ['-id']
         model = Recipe
         fields = '__all__'
-
