@@ -33,8 +33,8 @@ class Recipe(models.Model):
         validators=[validate_cooking_time]
     )
     is_favorited = models.BooleanField(
-        verbose_name='Показывать только рецепты, ' \
-                     'находящиеся в списке избранного.')
+        verbose_name='Показывать только рецепты,находящиеся в '
+                     'списке избранного.')
     is_in_shopping_cart = models.BooleanField(
         verbose_name='Показывать только рецепты, находящиеся в списке покупок')
     tags = models.ManyToManyField(Tags, through='RecipeTags')
