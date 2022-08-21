@@ -5,7 +5,7 @@ on:
 
 jobs:
   tests:
-    if: github.ref == 'refs/heads/develop1'
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
