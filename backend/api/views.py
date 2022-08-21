@@ -1,17 +1,19 @@
+import reportlab
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+from django.conf import settings
 
 from api.filters import AuthorAndTagFilter, IngredientSearchFilter
 from recipe.models import (Cart, Favorite, Ingredient, IngredientAmount,
-                           Recipe,Tag)
+                           Recipe, Tag)
 from api.pagination import LimitPageNumberPagination
 from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from api.serializers import (CropRecipeSerializer, IngredientSerializer,
@@ -42,19 +44,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['get', 'delete'],
+    @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        if request.method == 'GET':
+        if request.method == 'POST':
             return self.add_obj(Favorite, request.user, pk)
         elif request.method == 'DELETE':
             return self.delete_obj(Favorite, request.user, pk)
         return None
 
-    @action(detail=True, methods=['get', 'delete'],
+    @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        if request.method == 'GET':
+        if request.method == 'POST':
             return self.add_obj(Cart, request.user, pk)
         elif request.method == 'DELETE':
             return self.delete_obj(Cart, request.user, pk)
@@ -77,15 +79,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 }
             else:
                 final_list[name]['amount'] += item[2]
+        reportlab.rl_config.TTFSearchPath.append(
+            str(settings.BASE_DIR) + '/fonts')
         pdfmetrics.registerFont(
-            TTFont('Slimamif', 'Slimamif.ttf', 'UTF-8'))
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = ('attachment; '
-                                           'filename="shopping_list.pdf"')
-        page = canvas.Canvas(response)
-        page.setFont('Slimamif', size=24)
+            TTFont('Kyiv Type Sans', '../fonts/KyivTypeSans-VarGX.ttf',
+                   'UTF-8'))
+        r = HttpResponse(content_type='application/pdf')
+        r['Content-Disposition'] = ('attachment; '
+                                    'filename="shopping_list.pdf"')
+        page = canvas.Canvas(r)
+        page.setFont('Kyiv Type Sans', size=22)
         page.drawString(200, 800, 'Список ингредиентов')
-        page.setFont('Slimamif', size=16)
+        page.setFont('Kyiv Type Sans', size=14)
         height = 750
         for i, (name, data) in enumerate(final_list.items(), 1):
             page.drawString(75, height, (f'<{i}> {name} - {data["amount"]}, '
@@ -93,7 +98,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             height -= 25
         page.showPage()
         page.save()
-        return response
+        return r
 
     def add_obj(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
