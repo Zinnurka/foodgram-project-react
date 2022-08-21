@@ -14,6 +14,9 @@ class Tags(models.Model):
     color = models.CharField(max_length=200, verbose_name='Цветовой HEX-код')
     slug = models.SlugField(verbose_name='Slug', unique=True)
 
+    class Meta:
+        verbose_name = 'Тег'
+
     def __str__(self):
         return self.name
 
@@ -65,6 +68,13 @@ class IngredientAmount(models.Model):
                 1, message='Минимум 1'),),
         verbose_name='Количество',
     )
+
+    class Meta:
+        verbose_name = 'Количество ингридиента'
+        constraints = [
+            models.UniqueConstraint(fields=['ingredient', 'recipe'],
+                                    name='unique ingredients recipe')
+        ]
 
 
 class RecipeTags(models.Model):
