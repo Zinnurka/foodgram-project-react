@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipe.models import Recipe, Tags, Ingredient, User, IngredientAmount
+from recipe.models import Recipe, Tag, Ingredient, User, IngredientAmount
 from .fields import Base64ImageField
 from users.models import Follow
 from users.serializers import CustomUserSerializer
@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tags
+        model = Tag
         fields = '__all__'
 
 
@@ -50,7 +50,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         max_length=None, use_url=True, label='Картинка'
     )
     author = CustomUserSerializer(read_only=True)
-
     ingredients = IngredientAmountSerializer(
         source='ingredientamount_set',
         many=True,
@@ -130,7 +129,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class CropRecipeSerializer(serializers.ModelSerializer):
-    image = Base64ImageField()
+    image = Base64ImageField(
+        max_length=None, use_url=True, label='Картинка'
+    )
 
     class Meta:
         model = Recipe
