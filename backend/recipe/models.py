@@ -35,11 +35,6 @@ class Recipe(models.Model):
         verbose_name='Время приготовления (в минутах)',
         validators=[validate_cooking_time]
     )
-    is_favorited = models.BooleanField(
-        verbose_name='Показывать только рецепты,находящиеся в '
-                     'списке избранного.')
-    is_in_shopping_cart = models.BooleanField(
-        verbose_name='Показывать только рецепты, находящиеся в списке покупок')
     tags = models.ManyToManyField(Tags, through='RecipeTags')
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -80,3 +75,50 @@ class IngredientAmount(models.Model):
 class RecipeTags(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tags, on_delete=models.CASCADE)
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Рецепт',
+    )
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique favorite recipe for user')
+        ]
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Рецепт',
+    )
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'В корзине'
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique cart user')
+        ]
