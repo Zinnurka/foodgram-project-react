@@ -130,3 +130,7 @@ dmypy.json
 
 # .idea
 .idea
+
+# Project
+backend/media
+backend/db.sqlite3
