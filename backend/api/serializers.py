@@ -46,8 +46,19 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RecipeReadSerializer(serializers.ModelSerializer):
+    ingredients = IngredientAmountSerializer(
+        many=True, required=True, source="ingredient_recipe"
+    )
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'
+
+
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(read_only=True, many=True)
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objcts.all(),
+                                              many=True)
     image = Base64ImageField(
         max_length=None, use_url=True, label='Картинка'
     )
