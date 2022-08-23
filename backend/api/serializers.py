@@ -92,7 +92,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'ingredients': ('Убедитесь, что значение количества '
                                     'ингредиента больше 0')
                 })
-        data['ingredients'] = ingredients
         return data
 
     def create_ingredients(self, ingredients, recipe):
