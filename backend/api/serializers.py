@@ -110,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create_ingredients(self, ingredients, recipe):
         batch_size = 100
         objs = (IngredientAmount(recipe=recipe, ingredient_id=ingredient.get(
-            'id'), amount=ingredient.get('amount')) for ingredient in
+                'id'), amount=ingredient.get('amount')) for ingredient in
                 ingredients)
         while True:
             batch = list(islice(objs, batch_size))
