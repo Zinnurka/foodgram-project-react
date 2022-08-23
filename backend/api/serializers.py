@@ -1,3 +1,5 @@
+from itertools import islice
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -95,12 +97,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            IngredientAmount.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+        batch_size = 100
+        objs = (IngredientAmount(recipe=recipe, ingredient_id=ingredient.get(
+            'id'), amount=ingredient.get('amount')) for ingredient in
+                ingredients)
+        while True:
+            batch = list(islice(objs, batch_size))
+            if not batch:
+                break
+            IngredientAmount.objects.bulk_create(ingredients, batch_size)
 
     def create(self, validated_data):
         image = validated_data.pop('image')
