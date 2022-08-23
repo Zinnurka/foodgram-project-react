@@ -57,7 +57,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         if request.method == 'POST':
             return self.add_obj(Cart, request.user, pk)
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             return self.delete_obj(Cart, request.user, pk)
 
     @action(detail=False, methods=['get'],
