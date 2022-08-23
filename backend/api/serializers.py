@@ -1,3 +1,5 @@
+from itertools import islice
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -44,8 +46,19 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class RecipeReadSerializer(serializers.ModelSerializer):
+    ingredients = IngredientAmountSerializer(
+        many=True, required=True, source="ingredient_recipe"
+    )
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'
+
+
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(read_only=True, many=True)
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objcts.all(),
+                                              many=True)
     image = Base64ImageField(
         max_length=None, use_url=True, label='Картинка'
     )
@@ -74,8 +87,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
-    def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
+    def validate_ingredients(self, data):
+        ingredients = data['ingredients']
         if not ingredients:
             raise serializers.ValidationError({
                 'ingredients': 'Нужен хоть один ингридиент для рецепта'})
@@ -92,16 +105,18 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'ingredients': ('Убедитесь, что значение количества '
                                     'ингредиента больше 0')
                 })
-        data['ingredients'] = ingredients
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            IngredientAmount.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+        batch_size = 100
+        objs = (IngredientAmount(recipe=recipe, ingredient_id=ingredient.get(
+            'id'), amount=ingredient.get('amount')) for ingredient in
+                ingredients)
+        while True:
+            batch = list(islice(objs, batch_size))
+            if not batch:
+                break
+            IngredientAmount.objects.bulk_create(ingredients, batch_size)
 
     def create(self, validated_data):
         image = validated_data.pop('image')
@@ -113,19 +128,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
-        instance.tags.clear()
-        tags_data = self.initial_data.get('tags')
-        instance.tags.set(tags_data)
         IngredientAmount.objects.filter(recipe=instance).all().delete()
-        self.create_ingredients(validated_data.get('ingredients'), instance)
-        instance.save()
-        return instance
+        ingredients = validated_data.pop("ingredients")
+        self.create_ingredients(instance, ingredients)
+        return super().update(instance, validated_data)
 
 
 class CropRecipeSerializer(serializers.ModelSerializer):
@@ -169,3 +175,14 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
+    def validate(self, data):
+        author = data['followed']
+        user = data['follower']
+        if user == author:
+            raise serializers.ValidationError(
+                'Вы не можете подписываться на самого себя и отписываться')
+        if (Follow.objects.filter(author=author, user=user).exists()):
+            raise serializers.ValidationError(
+                'Вы уже подписаны на данного пользователя')
+        return data

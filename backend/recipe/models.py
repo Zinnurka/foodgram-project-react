@@ -32,9 +32,11 @@ class Recipe(models.Model):
                                verbose_name='Автор')
     name = models.CharField(max_length=200, verbose_name='Название')
     text = models.TextField(verbose_name='Описание')
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления (в минутах)',
-        validators=[validate_cooking_time]
+        validators=(
+            validators.MinValueValidator(
+                1, message='Минимум 1 минута'),),
     )
     tags = models.ManyToManyField(Tag, through='RecipeTags')
     ingredients = models.ManyToManyField(
