@@ -169,3 +169,14 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
+    def validate(self, data):
+        author = data['followed']
+        user = data['follower']
+        if user == author:
+            raise serializers.ValidationError(
+                'Вы не можете подписываться на самого себя и отписываться')
+        if (Follow.objects.filter(author=author, user=user).exists()):
+            raise serializers.ValidationError(
+                'Вы уже подписаны на данного пользователя')
+        return data
