@@ -117,7 +117,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         if UniqueValidator(queryset=Tag.objects.all()):
             return tags
 
-
     def create_ingredients(self, ingredients, recipe):
         batch_size = 100
         objs = (IngredientAmount(recipe=recipe, ingredient_id=ingredient.get(
