@@ -2,7 +2,7 @@ from itertools import islice
 
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from recipe.models import Recipe, Tag, Ingredient, User, IngredientAmount
 from .fields import Base64ImageField
@@ -106,6 +106,17 @@ class RecipeSerializer(serializers.ModelSerializer):
                                     'ингредиента больше 0')
                 })
         return data
+
+    def validate_cooking_time(self, cooking_time):
+        if int(cooking_time) <= 1:
+            raise serializers.ValidationError(
+                'Убедитесь, что время готовки больше или равно 1')
+        return cooking_time
+
+    def validate_tags(self, tags):
+        if UniqueValidator(queryset=Tag.objects.all()):
+            return tags
+
 
     def create_ingredients(self, ingredients, recipe):
         batch_size = 100
