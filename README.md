@@ -2,8 +2,9 @@
 ![example workflow](https://github.com/Zinnurka/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg) 
 
 ## Проект в интернете
-Проект запущен и доступен по [адресу](http://62.84.126.201/recipes)
-
+Проект запущен и доступен по [адресу](http://84.201.132.246//recipes)
+### Учетная запись
+zinnurov / 131091 / ramil@zinnyrov.ru
 
 ## Подготовка и запуск проекта
 ### Склонировать репозиторий на локальную машину:
