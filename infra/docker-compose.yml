@@ -17,7 +17,7 @@ services:
     env_file:
       - ./.env
   frontend:
-    image: yamdbskbox/foodgram_back:latest
+    image: zinnyr/frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
   nginx:
