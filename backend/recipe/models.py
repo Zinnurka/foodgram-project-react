@@ -16,7 +16,7 @@ class Tag(models.Model):
 
     class Meta:
         verbose_name = 'Тег'
-
+        verbose_name_plural = 'Теги'
     def __str__(self):
         return self.name
 
@@ -24,6 +24,12 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     measurement_unit = models.CharField(max_length=200, verbose_name='Мера')
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+    def __str__(self):
+        return self.name
+
 
 
 class Recipe(models.Model):
@@ -47,7 +53,12 @@ class Recipe(models.Model):
                               blank=True)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
 
 
 class IngredientAmount(models.Model):
@@ -74,6 +85,7 @@ class IngredientAmount(models.Model):
             models.UniqueConstraint(fields=['ingredient', 'recipe'],
                                     name='unique ingredients recipe')
         ]
+
 
 
 class RecipeTags(models.Model):
