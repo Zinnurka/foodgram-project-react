@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.core import validators
 
-
 User = get_user_model()
 
 
@@ -16,6 +15,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
+
     def __str__(self):
         return self.name
 
@@ -23,12 +23,13 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     measurement_unit = models.CharField(max_length=200, verbose_name='Мера')
+
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+
     def __str__(self):
         return self.name
-
 
 
 class Recipe(models.Model):
@@ -86,7 +87,6 @@ class IngredientAmount(models.Model):
             models.UniqueConstraint(fields=['ingredient', 'recipe'],
                                     name='unique ingredients recipe')
         ]
-
 
 
 class RecipeTags(models.Model):
